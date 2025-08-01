@@ -4,7 +4,7 @@ from helpers.response import ResponseInfo
 from apps.home.serializers import ( CreateOrUpdateHotelSerializer,
                                     # DeleteHotelSerializer,
                                     ListHotelSerializer)
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
 from drf_yasg.utils import swagger_auto_schema
 from helpers.helper import get_object_or_none
 from apps.home.models import Hotels
@@ -21,7 +21,7 @@ class CreateOrUpdateHotel(generics.GenericAPIView):
         super(CreateOrUpdateHotel,self).__init__(**kwargs)
 
     serializer_class    = CreateOrUpdateHotelSerializer
-    permission_classes  = (AllowAny,)
+    permission_classes  = (IsAdminUser,)
 
     @swagger_auto_schema(tags=['Hotel'])
     def post(self,request):
@@ -58,7 +58,7 @@ class DeleteHotelApiView(generics.DestroyAPIView):
         super(DeleteHotelApiView,self).__init__(**kwargs)
 
     serializer_class = ListHotelSerializer  
-    permission_classes = [AllowAny,]
+    permission_classes = [IsAdminUser,]
 
 
     @swagger_auto_schema (tags=["Hotel"],request_body=serializer_class)
@@ -96,7 +96,7 @@ class GetHotelListApiView(generics.GenericAPIView):
         super(GetHotelListApiView,self).__init__(**kwargs)
 
     serializer_class    = ListHotelSerializer
-    permission_classes  = (AllowAny,)
+    permission_classes  = (IsAdminUser,)
 
     @swagger_auto_schema(tags=['Hotel'])
     def get (self,request):

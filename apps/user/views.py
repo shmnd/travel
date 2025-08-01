@@ -63,10 +63,10 @@ class SuperAdminLoginView(generics.GenericAPIView):
             return Response(self.response_format, status=status.HTTP_200_OK)
         
         except Exception as e:
-            exec_type,exc_obj,exc_tb = sys.exc_info()
-            # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            exc_type, exc_obj, exc_tb             = sys.exc_info()
+            fname                                 = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
             self.response_format['status']        = False
-            self.response_format['message']       = f'{e}'
+            self.response_format['message']       = f'exc_type : {exc_type},fname : {fname},tb_lineno : {exc_tb.tb_lineno},error : {str(e)}'
             return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

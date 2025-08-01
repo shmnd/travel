@@ -1,7 +1,7 @@
 import os,sys
 import logging
 from typing import Any
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics,status
 from rest_framework.response import Response
@@ -19,7 +19,7 @@ class CreateOrUpdateDestination(generics.GenericAPIView):
         super(CreateOrUpdateDestination,self).__init__(**kwargs)
 
     serializer_class = CreateOrUpdateDestinationSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
 
     @swagger_auto_schema(tags=['Destination'])
 
@@ -56,7 +56,7 @@ class DeletDestination(generics.DestroyAPIView):
         super(DeletDestination,self).__init__(**kwargs)
 
     serializer_class = ListAndDeleteDestinationsSerializer
-    permission_classes = [AllowAny,]
+    permission_classes = [IsAdminUser,]
 
     @swagger_auto_schema(tags=['Destination'],request_body=serializer_class)
 
@@ -92,7 +92,7 @@ class GetDestinationList(generics.GenericAPIView):
         super(GetDestinationList,self).__init__(**kwargs)
 
     serializer_class = ListAndDeleteDestinationsSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser,)
 
     @swagger_auto_schema(tags=['Destination'])
     def get(self,request):
