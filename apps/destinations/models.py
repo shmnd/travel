@@ -4,6 +4,12 @@ from apps.home.models import AbstractDateFieldMix
 # Create your models here.
 
 class Destination(AbstractDateFieldMix):
+    class TravelType(models.TextChoices):
+        honeymoon = "Honey Moon"
+        adventure = "Adventure"
+        family = "Family"
+        nature = "Nature"
+
     main_destination_image =  models.FileField(_('Main Destination Name'), blank=True, null=True)
     main_destination_city = models.CharField(_('Main Destination City'), max_length=255, blank=True, null=True)
     main_destination_state = models.CharField(_('Main Destination State'), max_length=255, blank=True, null=True)
@@ -21,6 +27,12 @@ class Destination(AbstractDateFieldMix):
     avg_cost = models.DecimalField(_('Average cost'), max_digits=10, decimal_places=2, blank=True, null=True)
     activities = models.TextField(_('Activities'), blank=True, null=True)
     travel_guide = models.TextField(_('Travel Guide'), blank=True, null=True)
+    
+    is_active = models.BooleanField(_('Is active'), blank=True, null=True, default=True)
+    order = models.PositiveIntegerField(_('Order'), blank=True, null=True, default=0)
+    weather = models.URLField(_('Weather'),blank=True, null=True)
+    currency = models.CharField(_('Currency'),blank=True, null=True)
+    travel_tyep = models.CharField(_('Travel type'),choices=TravelType.choices,blank=True, null=True)
 
 
     class Meta:
