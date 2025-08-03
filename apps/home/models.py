@@ -23,15 +23,74 @@ class AbstractDateTimeFieldBaseModel(SafeDeleteModel, AbstractDateFieldMix):
         abstract = True
 
 
+#Hotel Model##
+
+
+
 class Hotels(AbstractDateTimeFieldBaseModel):
-    hotel_name    = models.CharField(_('Hotel Name'),max_length=255,blank=True, null=True)
-    hotel_place = models.TextField(_('Hotel Place'),max_length=255,blank=True, null=True)
-    hotel_price = models.IntegerField(_('Hotel Price'),blank=True, null=True)
+    # owner = models.ForeignKey(
+    #     settings.AUTH_USER_MODEL,
+    #     limit_choices_to={'role': 'hotel_owner'},
+    #     on_delete=models.CASCADE,
+    #     related_name='hotels'
+    # )
+    name = models.CharField(max_length=255,blank=True, null=True)
+    # location = models.ForeignKey('Destination', on_delete=models.CASCADE, related_name='hotels')
+    location = models.URLField(_('Hotal Location'), blank=True, null=True)
+    address = models.CharField(max_length=255,blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    facilities = models.TextField(help_text="Comma-separated or JSON list of facilities",blank=True, null=True)
+    # rating = models.FloatField(default=0.0)
+    # total_reviews = models.PositiveIntegerField(default=0)
+    main_image = models.ImageField(upload_to='hotels/', blank=True, null=True)
+    gallery = models.ManyToManyField('HotelImage', blank=True, related_name='hotel_gallery')
+    contact_email = models.EmailField(blank=True, null=True)
+    contact_phone = models.CharField(max_length=15,blank=True, null=True,unique=True)
+    website = models.URLField(blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = 'Hotel'
-        verbose_name_plural = 'Hotels'
+    def __str__(self):
+        return self.name
 
+
+class HotelImage(AbstractDateTimeFieldBaseModel):
+    hotel = models.ForeignKey(Hotels, on_delete=models.CASCADE, related_name='hotel_images')
+    image = models.ImageField(upload_to='hotel_images/')
+
+
+class Room(AbstractDateTimeFieldBaseModel):
+    ROOM_TYPE_CHOICES = [
+        ('single', 'Single'),
+        ('double', 'Double'),
+        ('suite', 'Suite'),
+        ('deluxe', 'Deluxe'),
+        ('family', 'Family'),
+        ('other', 'Other'),
+    ]
+    hotel = models.ForeignKey(Hotels, on_delete=models.CASCADE, related_name='rooms')
+    room_type = models.CharField(max_length=50, choices=ROOM_TYPE_CHOICES)
+    name = models.CharField(max_length=100,blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    availability = models.BooleanField(default=True)
+    max_occupancy = models.PositiveIntegerField(default=1)
+    facilities = models.TextField(blank=True, null=True, help_text="Comma-separated or JSON list of facilities")
+    image = models.ImageField(upload_to='rooms/', blank=True, null=True)
+    gallery = models.ManyToManyField('RoomImage', blank=True, related_name='room_gallery')
+    is_active = models.BooleanField(default=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.hotel.name} - {self.room_type}"
+
+
+class RoomImage(AbstractDateTimeFieldBaseModel):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='room_images')
+    image = models.ImageField(upload_to='room_images/')
 
 
 # Driver model

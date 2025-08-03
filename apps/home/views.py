@@ -29,7 +29,8 @@ class CreateOrUpdateHotel(generics.GenericAPIView):
     def post(self,request):
         try:
             instance    = get_object_or_none(Hotels,pk=request.data.get('id',None))
-            serializer  = self.serializer_class(instance,data=request.data,context={'request':request})
+            print(instance,'helooooooooooooooooooo')
+            serializer  = self.serializer_class(instance,data=request.data,context={'request':request}, partial=True)
 
             if not serializer.is_valid():
                 self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST

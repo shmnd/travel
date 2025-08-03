@@ -5,41 +5,75 @@ from helpers.helper import get_token_user_or_none
 
 
 class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
-    id            = serializers.IntegerField(allow_null=True,required=False)
-    hotel_name    = serializers.CharField(allow_null=True,allow_blank=True,required=False)
-    hotel_place   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
-    hotel_price   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    id   = serializers.IntegerField(allow_null=True,required=False)
+    name    = serializers.CharField(allow_null=True,allow_blank=True,required=False)
+    location = serializers.URLField(required=True)
+    address   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    description   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    facilities   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    main_image = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+
+    # gallery = serializers.CharField(required=True,allow_null=True,allow_blank=True)
+    contact_email = serializers.CharField(required=True,allow_null=True,allow_blank=True)
+    contact_phone = serializers.IntegerField(required=True)
+    website = serializers.URLField(required=True,allow_null=True,allow_blank=True)
+    is_verified = serializers.BooleanField(default=True)
+    is_active = serializers.BooleanField(default=True)
 
 
     class Meta:
         model = Hotels
-        fields =['id','hotel_name','hotel_place','hotel_price'] 
+        fields = [
+            'id', 'name', 'location', 'address', 'description',
+            'facilities', 'main_image',
+            'contact_email', 'contact_phone', 'website',
+            'is_verified', 'is_active'#,'gallery'
+        ]
 
     def validate(self, attrs):
         return super().validate(attrs)
-    
+
     def create(self, validated_data):
-        request         = self.context.get('request',None)
-        user_instance   = get_token_user_or_none(request)
+        request       = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
 
-        instance            = Hotels()
-        instance.hotel_name   = validated_data.get("hotel_name",None)
-        instance.hotel_place     = validated_data.get('hotel_place',None)
-        instance.hotel_price      = validated_data.get('hotel_price',None)
+        instance = Hotels()
+        instance.name           = validated_data.get("name",None)
+        instance.location       = validated_data.get("location",None)
+        instance.address        = validated_data.get("address",None)
+        instance.description    = validated_data.get("description",None)
+        instance.facilities     = validated_data.get("facilities",None)
+        # instance.gallery    = validated_data.get("gallery",None)
+        instance.main_image     = validated_data.get("main_image",None)
+        instance.contact_email  = validated_data.get("contact_email",None)
+        instance.contact_phone  = validated_data.get("contact_phone",None)
+        instance.website        = validated_data.get("website",None)
+        instance.is_verified    = validated_data.get("is_verified", True)
+        instance.is_active      = validated_data.get("is_active", True)
+
         instance.created_by = user_instance
-
         instance.save()
         return instance
     
 
     def update(self, instance, validated_data):
-        request                 = self.context.get('request',None)
-        user_instance           = get_token_user_or_none(request)
-        instance.hotel_name   = validated_data.get("hotel_name",instance.hotel_name)
-        instance.hotel_place  = validated_data.get('hotel_place',instance.hotel_place)
-        instance.hotel_price  = validated_data.get('hotel_price',instance.hotel_price)
-        instance.modified_by    = user_instance
+        request       = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
 
+        instance.name           = validated_data.get("name", instance.name)
+        instance.location       = validated_data.get("location", instance.location)
+        instance.address        = validated_data.get("address", instance.address)
+        instance.description    = validated_data.get("description", instance.description)
+        instance.facilities     = validated_data.get("facilities", instance.facilities)
+        # instance.gallery    = validated_data.get("hotel_price", instance.gallery)
+        instance.main_image     = validated_data.get("main_image", instance.main_image)
+        instance.contact_email  = validated_data.get("contact_email", instance.contact_email)
+        instance.contact_phone  = validated_data.get("contact_phone", instance.contact_phone)
+        instance.website        = validated_data.get("website", instance.website)
+        instance.is_verified    = validated_data.get("is_verified", instance.is_verified)
+        instance.is_active      = validated_data.get("is_active", instance.is_active)
+
+        instance.modified_by = user_instance
         instance.save()
         return instance
     
@@ -55,10 +89,7 @@ class ListHotelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hotels
-        fields = ['id', 'hotel_name', 'hotel_place', 'hotel_price']
-
-
-
+        fields = "__all__"
 
 
 # vehicle
