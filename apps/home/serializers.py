@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from apps.home.models import Hotels
-
+from apps.home.models import Hotels,Driver
+from helpers.helper import get_token_user_or_none
 
 
 
@@ -59,3 +59,84 @@ class ListHotelSerializer(serializers.ModelSerializer):
 
 
 
+
+
+# Drive
+
+class CreateOrUpdateDriverSerializer(serializers.ModelSerializer):
+    id              = serializers.IntegerField(allow_null=True, required=False)
+    name            = serializers.CharField(allow_null=True, allow_blank=True, required=True)
+    phone_number    = serializers.CharField(required=True, allow_null=True, allow_blank=True)
+    email           = serializers.EmailField(required=False, allow_null=True, allow_blank=True)
+    license_number  = serializers.CharField(required=True, allow_null=True, allow_blank=True)
+    license_expiry  = serializers.DateField(required=True, allow_null=True)
+    address         = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    profile_image   = serializers.FileField(required=False)
+    aadhar_number   = serializers.CharField(required=True, allow_null=True, allow_blank=True)
+    aadhar_document = serializers.FileField(required=True)
+    police_verification = serializers.FileField(required=True)
+    is_verified     = serializers.BooleanField(default=False)
+    is_active       = serializers.BooleanField(default=False)
+    total_rides     = serializers.IntegerField(default=0)
+
+    class Meta:
+        model = Driver
+        fields = "__all__"
+
+        # [
+        #     'id', 'name', 'phone_number', 'email', 'license_number',
+        #     'license_expiry', 'address', 'profile_image', 'aadhar_number',
+        #     'aadhar_document', 'police_verification', 'is_verified',
+        #     'is_active', 'total_rides'
+        # ]
+
+
+        
+    def validate(self, attrs):
+        # Add extra validation if needed
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        request = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance = Driver()
+        instance.name               = validated_data.get("name", None)
+        instance.phone_number       = validated_data.get("phone_number", None)
+        instance.email              = validated_data.get("email", None)
+        instance.license_number     = validated_data.get("license_number", None)
+        instance.license_expiry     = validated_data.get("license_expiry", None)
+        instance.address            = validated_data.get("address", None)
+        instance.profile_image      = validated_data.get("profile_image", None)
+        instance.aadhar_number      = validated_data.get("aadhar_number", None)
+        instance.aadhar_document    = validated_data.get("aadhar_document", None)
+        instance.police_verification= validated_data.get("police_verification", None)
+        instance.is_verified        = validated_data.get("is_verified", False)
+        instance.is_active          = validated_data.get("is_active", True)
+        instance.total_rides        = validated_data.get("total_rides", 0)
+
+        instance.created_by = user_instance
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance.name               = validated_data.get("name", instance.name)
+        instance.phone_number       = validated_data.get("phone_number", instance.phone_number)
+        instance.email              = validated_data.get("email", instance.email)
+        instance.license_number     = validated_data.get("license_number", instance.license_number)
+        instance.license_expiry     = validated_data.get("license_expiry", instance.license_expiry)
+        instance.address            = validated_data.get("address", instance.address)
+        instance.profile_image      = validated_data.get("profile_image", instance.profile_image)
+        instance.aadhar_number      = validated_data.get("aadhar_number", instance.aadhar_number)
+        instance.aadhar_document    = validated_data.get("aadhar_document", instance.aadhar_document)
+        instance.police_verification= validated_data.get("police_verification", instance.police_verification)
+        instance.is_verified        = validated_data.get("is_verified", instance.is_verified)
+        instance.is_active          = validated_data.get("is_active", instance.is_active)
+        instance.total_rides        = validated_data.get("total_rides", instance.total_rides)
+
+        instance.modified_by = user_instance
+        instance.save()
+        return instance

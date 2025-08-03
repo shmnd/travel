@@ -23,7 +23,7 @@ class AbstractDateTimeFieldBaseModel(SafeDeleteModel, AbstractDateFieldMix):
         abstract = True
 
 
-class Hotels(AbstractDateFieldMix):
+class Hotels(AbstractDateTimeFieldBaseModel):
     hotel_name    = models.CharField(_('Hotel Name'),max_length=255,blank=True, null=True)
     hotel_place = models.TextField(_('Hotel Place'),max_length=255,blank=True, null=True)
     hotel_price = models.IntegerField(_('Hotel Price'),blank=True, null=True)
