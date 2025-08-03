@@ -207,7 +207,7 @@ class CreateOrUpdateVehicle(generics.GenericAPIView):
     def post(self,request):
         try:
             instance    = get_object_or_none(Vehicle,pk=request.data.get('id',None))
-            serializer  = self.serializer_class(instance,data=request.data,context={'request':request})
+            serializer  = self.serializer_class(instance,data=request.data,context={'request':request}, partial=True)
 
             if not serializer.is_valid():
                 self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
