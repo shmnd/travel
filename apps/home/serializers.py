@@ -113,7 +113,24 @@ class CreateOrUpdateVehicleSerializer(serializers.ModelSerializer):
         request = self.context.get("request", None)
         user_instance = get_token_user_or_none(request)
 
-        instance = Vehicle(**validated_data)
+        instance = Vehicle()
+        instance.brand = validated_data.get("brand")
+        instance.model = validated_data.get("model")
+        instance.registration_number = validated_data.get("registration_number")
+        instance.seating_capacity = validated_data.get("seating_capacity")
+        instance.vehicle_type = validated_data.get("vehicle_type")
+        instance.color = validated_data.get("color")
+        instance.year = validated_data.get("year")
+        instance.insurance_number = validated_data.get("insurance_number")
+        instance.insurance_expiry = validated_data.get("insurance_expiry")
+        instance.vehicle_image = validated_data.get("vehicle_image")
+        instance.rc_document = validated_data.get("rc_document")
+        instance.is_verified = validated_data.get("is_verified", False)
+        instance.is_active = validated_data.get("is_active", True)
+        instance.fuel = validated_data.get("fuel")
+        instance.features = validated_data.get("features")
+        instance.owner = validated_data.get("owner")
+
         instance.created_by = user_instance
         instance.save()
         return instance
@@ -122,8 +139,22 @@ class CreateOrUpdateVehicleSerializer(serializers.ModelSerializer):
         request = self.context.get("request", None)
         user_instance = get_token_user_or_none(request)
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        instance.brand = validated_data.get("brand", instance.brand)
+        instance.model = validated_data.get("model", instance.model)
+        instance.registration_number = validated_data.get("registration_number", instance.registration_number)
+        instance.seating_capacity = validated_data.get("seating_capacity", instance.seating_capacity)
+        instance.vehicle_type = validated_data.get("vehicle_type", instance.vehicle_type)
+        instance.color = validated_data.get("color", instance.color)
+        instance.year = validated_data.get("year", instance.year)
+        instance.insurance_number = validated_data.get("insurance_number", instance.insurance_number)
+        instance.insurance_expiry = validated_data.get("insurance_expiry", instance.insurance_expiry)
+        instance.vehicle_image = validated_data.get("vehicle_image", instance.vehicle_image)
+        instance.rc_document = validated_data.get("rc_document", instance.rc_document)
+        instance.is_verified = validated_data.get("is_verified", instance.is_verified)
+        instance.is_active = validated_data.get("is_active", instance.is_active)
+        instance.fuel = validated_data.get("fuel", instance.fuel)
+        instance.features = validated_data.get("features", instance.features)
+        instance.owner = validated_data.get("owner", instance.owner)
 
         instance.modified_by = user_instance
         instance.save()

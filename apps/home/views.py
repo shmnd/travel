@@ -104,7 +104,7 @@ class GetHotelListApiView(generics.GenericAPIView):
     def get (self,request):
         try:
             queryset = Hotels.objects.all().order_by('id')
-            serializer                            = self.serializer_class(queryset,many=True,context={'request':request})
+            serializer = self.serializer_class(queryset,many=True,context={'request':request})
             
             self.response_format['status_code']   = status.HTTP_200_OK
             self.response_format['status']        = True
@@ -206,7 +206,7 @@ class CreateOrUpdateVehicle(generics.GenericAPIView):
     def post(self,request):
         try:
             instance    = get_object_or_none(Vehicle,pk=request.data.get('id',None))
-            serializer  = self.serializer_class(instance,data=request.data,context={'request':request}, partial=True)
+            serializer  = self.serializer_class(instance,data=request.data,context={'request':request})
 
             if not serializer.is_valid():
                 self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
@@ -232,7 +232,7 @@ class CreateOrUpdateVehicle(generics.GenericAPIView):
             return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# list driver
+# list Vehicle
 class GetVehicleListApiView(generics.GenericAPIView):
     def __init__(self, **kwargs: Any) -> None:
         self.response_format = ResponseInfo().response
@@ -245,7 +245,7 @@ class GetVehicleListApiView(generics.GenericAPIView):
     def get (self,request):
         try:
             queryset = Vehicle.objects.all().order_by('id')
-            serializer                            = self.serializer_class(queryset,many=True,context={'request':request})
+            serializer = self.serializer_class(queryset,many=True,context={'request':request})
             
             self.response_format['status_code']   = status.HTTP_200_OK
             self.response_format['status']        = True
