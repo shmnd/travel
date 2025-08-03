@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.home.models import Hotels,Driver
+from apps.home.models import Hotels,Driver,Vehicle
 from helpers.helper import get_token_user_or_none
 
 
@@ -19,26 +19,26 @@ class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
     
     def create(self, validated_data):
-        # request         = self.context.get('request',None)
-        # user_instance   = get_token_user_or_none(request)
+        request         = self.context.get('request',None)
+        user_instance   = get_token_user_or_none(request)
 
         instance            = Hotels()
         instance.hotel_name   = validated_data.get("hotel_name",None)
         instance.hotel_place     = validated_data.get('hotel_place',None)
         instance.hotel_price      = validated_data.get('hotel_price',None)
-        # instance.created_by = user_instance
+        instance.created_by = user_instance
 
         instance.save()
         return instance
     
 
     def update(self, instance, validated_data):
-        # request                 = self.context.get('request',None)
-        # user_instance           = get_token_user_or_none(request)
+        request                 = self.context.get('request',None)
+        user_instance           = get_token_user_or_none(request)
         instance.hotel_name   = validated_data.get("hotel_name",instance.hotel_name)
         instance.hotel_place  = validated_data.get('hotel_place',instance.hotel_place)
         instance.hotel_price  = validated_data.get('hotel_price',instance.hotel_price)
-        # instance.modified_by    = user_instance
+        instance.modified_by    = user_instance
 
         instance.save()
         return instance
@@ -56,6 +56,79 @@ class ListHotelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hotels
         fields = ['id', 'hotel_name', 'hotel_place', 'hotel_price']
+
+
+
+
+
+# vehicle
+
+class CreateOrUpdateVehicleSerializer(serializers.ModelSerializer):
+    id                  = serializers.IntegerField(allow_null=True, required=False)
+    brand               = serializers.CharField(required=True)
+    model               = serializers.CharField(required=True)
+    registration_number = serializers.CharField(required=True)
+    seating_capacity    = serializers.IntegerField(required=True)
+    vehicle_type        = serializers.CharField(required=True)
+    color               = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    year                = serializers.IntegerField(required=False, allow_null=True)
+    insurance_number    = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    insurance_expiry    = serializers.DateField(required=False, allow_null=True)
+    vehicle_image       = serializers.FileField(required=False, allow_null=True)
+    rc_document         = serializers.FileField(required=False, allow_null=True)
+    is_verified         = serializers.BooleanField(default=False)
+    is_active           = serializers.BooleanField(default=True)
+    fuel                = serializers.ChoiceField(choices=Vehicle.FuelType.choices, required=False, allow_null=True)
+    features            = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+
+    # Foreign key (writable)
+    owner = serializers.PrimaryKeyRelatedField(
+        queryset=Driver.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    # Extra read-only fields
+    owner_name = serializers.SerializerMethodField()
+    is_company_owned = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Vehicle
+        fields = [
+            "id", "brand", "model", "registration_number", "seating_capacity",
+            "vehicle_type", "color", "year", "insurance_number", "insurance_expiry",
+            "vehicle_image", "rc_document", "is_verified", "is_active",
+            "fuel", "features", "owner", "owner_name", "is_company_owned",
+        ]
+
+    def get_owner_name(self, obj):
+        """Return the driver's name if assigned, else 'Company Owned'."""
+        return obj.owner.name if obj.owner else "Company Owned"
+
+    def get_is_company_owned(self, obj):
+        """Return True if no driver is linked."""
+        return obj.owner is None
+
+    def create(self, validated_data):
+        request = self.context.get("request", None)
+        user_instance = get_token_user_or_none(request)
+
+        instance = Vehicle(**validated_data)
+        instance.created_by = user_instance
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        request = self.context.get("request", None)
+        user_instance = get_token_user_or_none(request)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.modified_by = user_instance
+        instance.save()
+        return instance
+    
 
 
 
@@ -79,16 +152,18 @@ class CreateOrUpdateDriverSerializer(serializers.ModelSerializer):
     is_active       = serializers.BooleanField(default=False)
     total_rides     = serializers.IntegerField(default=0)
 
+    vehicles = CreateOrUpdateVehicleSerializer(source="owned_vehicles", many=True, read_only=True)
+
     class Meta:
         model = Driver
-        fields = "__all__"
+        # fields = "__all__"
 
-        # [
-        #     'id', 'name', 'phone_number', 'email', 'license_number',
-        #     'license_expiry', 'address', 'profile_image', 'aadhar_number',
-        #     'aadhar_document', 'police_verification', 'is_verified',
-        #     'is_active', 'total_rides'
-        # ]
+        fields = [
+            'id', 'name', 'phone_number', 'email', 'license_number',
+            'license_expiry', 'address', 'profile_image', 'aadhar_number',
+            'aadhar_document', 'police_verification', 'is_verified',
+            'is_active', 'total_rides','vehicles',
+        ]
 
 
         

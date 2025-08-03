@@ -33,19 +33,40 @@ class Hotels(AbstractDateTimeFieldBaseModel):
         verbose_name_plural = 'Hotels'
 
 
-##CAB##
 
-# Category of the cab (e.g., SUV, Sedan, etc.)
-class CabCategory(AbstractDateTimeFieldBaseModel):
+# Driver model
+class Driver(AbstractDateTimeFieldBaseModel):
     name = models.CharField(max_length=100)
-    description = models.TextField(null=False, default='Default description')
-    icon = models.CharField(max_length=50, blank=True)  # For admin/UI
+    phone_number = models.CharField(max_length=15,unique=True)
+    email = models.EmailField(unique=True)
+    license_number = models.CharField(max_length=100, unique=True)
+    license_expiry = models.DateField(blank=True, null=True)
+    address = models.TextField()
+    profile_image = models.ImageField(upload_to='home/drivers/', blank=True, null=True)
+    aadhar_number = models.CharField(max_length=20, blank=True)
+    aadhar_document = models.FileField(upload_to='home/aadhar/', blank=True, null=True)
+    police_verification = models.FileField(upload_to='home/police/', blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    total_rides = models.PositiveIntegerField(default=0)
 
-    order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
+
+# Driver image model (inline to Driver)
+class DriverImage(AbstractDateTimeFieldBaseModel):
+    driver = models.ForeignKey(Driver, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='drivers/gallery/')
+    caption = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"Image for {self.driver}"
+
+
+    
+
+
 
 # Vehicle model
 class Vehicle(AbstractDateTimeFieldBaseModel):
@@ -56,6 +77,7 @@ class Vehicle(AbstractDateTimeFieldBaseModel):
         electric   = 'Electric'
         cng = "CNG"
 
+    owner = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='owned_vehicles', null= True, blank= True)
     brand = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     registration_number = models.CharField(max_length=50, unique=True)
@@ -86,39 +108,26 @@ class VehicleImage(AbstractDateTimeFieldBaseModel):
 
     def __str__(self):
         return f"Image for {self.vehicle}"
+    
 
-# Driver model
-class Driver(AbstractDateTimeFieldBaseModel):
+
+
+
+##CAB##
+
+# Category of the cab (e.g., SUV, Sedan, etc.)
+class CabCategory(AbstractDateTimeFieldBaseModel):
     name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=15,unique=True)
-    email = models.EmailField(unique=True)
-    license_number = models.CharField(max_length=100, unique=True)
-    license_expiry = models.DateField(blank=True, null=True)
-    address = models.TextField()
-    profile_image = models.ImageField(upload_to='home/drivers/', blank=True, null=True)
-    aadhar_number = models.CharField(max_length=20, blank=True)
-    aadhar_document = models.FileField(upload_to='home/aadhar/', blank=True, null=True)
-    police_verification = models.FileField(upload_to='home/police/', blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
+    description = models.TextField(null=False, default='Default description')
+    icon = models.CharField(max_length=50, blank=True)  # For admin/UI
     is_active = models.BooleanField(default=True)
-    total_rides = models.PositiveIntegerField(default=0)
 
-    # rating = models.FloatField(default=0.0)
-
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
+    order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
 
-# Driver image model (inline to Driver)
-class DriverImage(AbstractDateTimeFieldBaseModel):
-    driver = models.ForeignKey(Driver, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='drivers/gallery/')
-    caption = models.CharField(max_length=255, blank=True)
 
-    def __str__(self):
-        return f"Image for {self.driver}"
 
 # Cab model
 class Cab(AbstractDateTimeFieldBaseModel):
@@ -134,9 +143,7 @@ class Cab(AbstractDateTimeFieldBaseModel):
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
-
     def __str__(self):
         return f"Cab - {self.vehicle} with Driver - {self.driver}"
+
     

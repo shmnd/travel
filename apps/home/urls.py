@@ -18,6 +18,13 @@ urlpatterns = [
 
     ])),
 
+    re_path(r'^Vehicle/', include([
+        path('create-or-update-vehicle', views.CreateOrUpdateVehicle.as_view()),
+        path('retrive-vehicle', views.GetVehicleListApiView.as_view()),
+
+
+    ])),
+
 
 
 ]
