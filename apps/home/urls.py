@@ -9,6 +9,15 @@ urlpatterns = [
         path('delete-Hotel', views.DeleteHotelApiView.as_view()),
         path('retrieve-Hotel', views.GetHotelListApiView.as_view()),
 
-     ])),
+    ])),
+
+    re_path(r'^Driver/', include([
+        path('create-or-update-driver', views.CreateOrUpdateDriver.as_view()),
+        path('retrive-driver', views.GetDriverListApiView.as_view()),
+
+
+    ])),
+
+
 
 ]
