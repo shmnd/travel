@@ -14,6 +14,8 @@ urlpatterns = [
     re_path(r'^Driver/', include([
         path('create-or-update-driver', views.CreateOrUpdateDriver.as_view()),
         path('retrive-driver', views.GetDriverListApiView.as_view()),
+        path('delete-driver', views.DeleteDriverApiView.as_view()),
+
 
 
     ])),
@@ -21,6 +23,8 @@ urlpatterns = [
     re_path(r'^Vehicle/', include([
         path('create-or-update-vehicle', views.CreateOrUpdateVehicle.as_view()),
         path('retrive-vehicle', views.GetVehicleListApiView.as_view()),
+        path('delete-vehicle', views.DeleteVehicleApiView.as_view()),
+
 
 
     ])),

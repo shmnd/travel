@@ -54,6 +54,8 @@ class SuperAdminLoginView(generics.GenericAPIView):
                     "username":user.username,
                     "email": user.email,
                     "is_superuser": user.is_superuser,
+                    "is_staff": user.is_staff,
+
                 }
             }
 

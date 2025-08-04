@@ -193,7 +193,12 @@ class CreateOrUpdateVehicleSerializer(serializers.ModelSerializer):
     
 
 
+class DeleteVehicleSerializer(serializers.ModelSerializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
 
+    class Meta:
+        model = Vehicle
+        fields = ['id']
 
 
 # Drive
@@ -277,3 +282,11 @@ class CreateOrUpdateDriverSerializer(serializers.ModelSerializer):
         instance.modified_by = user_instance
         instance.save()
         return instance
+    
+
+class DeleteDriverSerializer(serializers.ModelSerializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+    class Meta:
+        model = Driver
+        fields = ['id']

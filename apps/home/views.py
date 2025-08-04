@@ -4,7 +4,9 @@ from apps.home.serializers import ( CreateOrUpdateHotelSerializer,
                                     # DeleteHotelSerializer,
                                     ListHotelSerializer,
                                     CreateOrUpdateDriverSerializer,
-                                    CreateOrUpdateVehicleSerializer)
+                                    DeleteDriverSerializer,
+                                    CreateOrUpdateVehicleSerializer,
+                                    DeleteVehicleSerializer,)
 
 from rest_framework.permissions import IsAdminUser,IsAdminOrStaff
 from drf_yasg.utils import swagger_auto_schema
@@ -174,7 +176,7 @@ class GetDriverListApiView(generics.GenericAPIView):
     def get (self,request):
         try:
             queryset = Driver.objects.all().order_by('id')
-            serializer                            = self.serializer_class(queryset,many=True,context={'request':request})
+            serializer  = self.serializer_class(queryset,many=True,context={'request':request})
             
             self.response_format['status_code']   = status.HTTP_200_OK
             self.response_format['status']        = True
@@ -190,7 +192,40 @@ class GetDriverListApiView(generics.GenericAPIView):
             return Response(self.response_format, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
+class DeleteDriverApiView(generics.DestroyAPIView):
+    def __init__(self, **kwargs: Any) -> None:
+        self.response_format = ResponseInfo().response
+        super(DeleteDriverApiView,self).__init__(**kwargs)
 
+    serializer_class =   DeleteDriverSerializer
+    permission_classes = [IsAdminUser,]
+
+
+    @swagger_auto_schema (tags=["Driver"],request_body=serializer_class)
+    def delete(self, request, *args, **kwargs):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if not serializer.is_valid():
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['error']         = serializer.errors
+                return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
+            
+            ids = serializer.validated_data.get('id',[])
+            Driver.objects.filter(id__in = ids).delete()
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['message']       = "Deleted success"
+            return Response(self.response_format,status=status.HTTP_200_OK)
+
+        except Exception as e:
+            exc_type,exc_obj,exc_tb               = sys.exc_info()
+            fname                                 = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = f'exc_type:{exc_type},fname:{fname},tb_lineno:{exc_tb.tb_lineno},error:{str(e)}'
+            return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # Vehicle
@@ -260,3 +295,40 @@ class GetVehicleListApiView(generics.GenericAPIView):
             self.response_format['status']        = False
             self.response_format['message']       = f'exc_type : {exc_type},fname : {fname},tb_lineno : {exc_tb.tb_lineno},error : {str(e)}'
             return Response(self.response_format, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+class DeleteVehicleApiView(generics.DestroyAPIView):
+    def __init__(self, **kwargs: Any) -> None:
+        self.response_format = ResponseInfo().response
+        super(DeleteVehicleApiView,self).__init__(**kwargs)
+
+    serializer_class =   DeleteVehicleSerializer
+    permission_classes = [IsAdminUser,]
+
+
+    @swagger_auto_schema (tags=["Vehicle"],request_body=serializer_class)
+    def delete(self, request, *args, **kwargs):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if not serializer.is_valid():
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['error']         = serializer.errors
+                return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
+            
+            ids = serializer.validated_data.get('id',[])
+            Vehicle.objects.filter(id__in = ids).delete()
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['message']       = "Deleted success"
+            return Response(self.response_format,status=status.HTTP_200_OK)
+
+        except Exception as e:
+            exc_type,exc_obj,exc_tb               = sys.exc_info()
+            fname                                 = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = f'exc_type:{exc_type},fname:{fname},tb_lineno:{exc_tb.tb_lineno},error:{str(e)}'
+            return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
