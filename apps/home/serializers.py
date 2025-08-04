@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.home.models import Hotels,Driver,Vehicle
+from apps.home.models import Hotels,Driver,Vehicle,Cab,CabCategory
 from helpers.helper import get_token_user_or_none
 
 
@@ -290,3 +290,139 @@ class DeleteDriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = ['id']
+
+
+
+# cab category 
+
+class CreateOrUpdateCabCategorySerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(allow_null=True, required=False)
+
+    class Meta:
+        model = CabCategory
+        fields = ["id", "name", "description", "is_active"]
+
+    def validate(self, attrs):
+        # Add extra validation if needed
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        request = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance = CabCategory()
+        instance.name               = validated_data.get("name", None)
+        instance.description       = validated_data.get("description", None)
+        instance.is_active              = validated_data.get("is_active", None)
+
+
+        instance.created_by = user_instance
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance.name               = validated_data.get("name", instance.name)
+        instance.description       = validated_data.get("description", instance.description)
+        instance.is_active              = validated_data.get("is_active", instance.is_active)
+
+
+        instance.modified_by = user_instance
+        instance.save()
+        return instance
+
+
+class DeleteCabCategorySerializer(serializers.ModelSerializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+    class Meta:
+        model = CabCategory
+        fields = ['id']
+
+
+# cabs 
+class CreateOrUpdateCabSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(allow_null=True, required=False)
+
+    category_id = serializers.PrimaryKeyRelatedField(queryset=CabCategory.objects.all(),source="category")
+    category = CreateOrUpdateCabCategorySerializer(read_only=True) 
+    vehicle = serializers.PrimaryKeyRelatedField(queryset=Vehicle.objects.all())
+    driver = serializers.PrimaryKeyRelatedField(queryset=Driver.objects.all())
+
+    class Meta:
+        model = Cab
+        fields = [
+            "id","category_id","category","vehicle","driver",
+            "is_available","price_per_km", "base_fare","description",
+            "total_trips","is_verified","is_active",
+        ]
+
+    def validate(self, attrs):
+        # Example: ensure price_per_km is positive
+        if attrs.get("price_per_km", 0) < 0:
+            raise serializers.ValidationError({"price_per_km": "Price per km must be positive"})
+        # Vehicle validation
+        vehicle = attrs.get("vehicle")
+        if not vehicle:
+            raise serializers.ValidationError({"vehicle": "Vehicle is required."})
+        if Cab.objects.filter(vehicle=vehicle).exists() and not self.instance:
+            raise serializers.ValidationError({"vehicle": "This vehicle is already assigned to another cab."})
+
+        # Driver validation
+        driver = attrs.get("driver")
+        if not driver:
+            raise serializers.ValidationError({"driver": "Driver is required."})
+        if Cab.objects.filter(driver=driver).exists() and not self.instance:
+            raise serializers.ValidationError({"driver": "This driver is already assigned to another cab."})
+
+        return attrs
+
+    def create(self, validated_data):
+        request = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance = Cab()
+        instance.category        = validated_data.get("category")
+        instance.vehicle         = validated_data.get("vehicle")
+        instance.driver          = validated_data.get("driver")
+        instance.is_available    = validated_data.get("is_available", True)
+        instance.price_per_km    = validated_data.get("price_per_km", 0.0)
+        instance.base_fare       = validated_data.get("base_fare", 0.0)
+        instance.description     = validated_data.get("description", "")
+        instance.total_trips     = validated_data.get("total_trips", 0)
+        instance.is_verified     = validated_data.get("is_verified", False)
+        instance.is_active       = validated_data.get("is_active", True)
+
+        instance.created_by = user_instance
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance.category        = validated_data.get("category", instance.category)
+        instance.vehicle         = validated_data.get("vehicle", instance.vehicle)
+        instance.driver          = validated_data.get("driver", instance.driver)
+        instance.is_available    = validated_data.get("is_available", instance.is_available)
+        instance.price_per_km    = validated_data.get("price_per_km", instance.price_per_km)
+        instance.base_fare       = validated_data.get("base_fare", instance.base_fare)
+        instance.description     = validated_data.get("description", instance.description)
+        instance.total_trips     = validated_data.get("total_trips", instance.total_trips)
+        instance.is_verified     = validated_data.get("is_verified", instance.is_verified)
+        instance.is_active       = validated_data.get("is_active", instance.is_active)
+
+        instance.modified_by = user_instance
+        instance.save()
+        return instance
+    
+
+class DeleteCabSerializer(serializers.ModelSerializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+    class Meta:
+        model = Cab
+        fields = ['id']
+

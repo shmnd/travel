@@ -16,8 +16,6 @@ urlpatterns = [
         path('retrive-driver', views.GetDriverListApiView.as_view()),
         path('delete-driver', views.DeleteDriverApiView.as_view()),
 
-
-
     ])),
 
     re_path(r'^Vehicle/', include([
@@ -25,7 +23,19 @@ urlpatterns = [
         path('retrive-vehicle', views.GetVehicleListApiView.as_view()),
         path('delete-vehicle', views.DeleteVehicleApiView.as_view()),
 
+    ])),
 
+    re_path(r'^Cab-Catgory/', include([
+        path('create-or-update-cab-category', views.CreateOrUpdateCabCategory.as_view()),
+        path('retrive-cab-category', views.GetCabCategoryListApiView.as_view()),
+        path('delete-cab-category', views.DeleteCabCategoryApiView.as_view()),
+
+    ])),
+
+    re_path(r'^Cabs/', include([
+        path('create-or-update-cabs', views.CreateOrUpdateCab.as_view()),
+        path('retrive-cab', views.GetCabListApiView.as_view()),
+        path('delete-cab', views.DeleteCabApiView.as_view()),
 
     ])),
 

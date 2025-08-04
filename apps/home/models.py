@@ -35,13 +35,10 @@ class Hotels(AbstractDateTimeFieldBaseModel):
     #     related_name='hotels'
     # )
     name = models.CharField(max_length=255,blank=True, null=True)
-    # location = models.ForeignKey('Destination', on_delete=models.CASCADE, related_name='hotels')
     location = models.URLField(_('Hotal Location'), blank=True, null=True)
     address = models.CharField(max_length=255,blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     facilities = models.TextField(help_text="Comma-separated or JSON list of facilities",blank=True, null=True)
-    # rating = models.FloatField(default=0.0)
-    # total_reviews = models.PositiveIntegerField(default=0)
     main_image = models.ImageField(upload_to='hotels/', blank=True, null=True)
     gallery = models.ManyToManyField('HotelImage', blank=True, related_name='hotel_gallery')
     contact_email = models.EmailField(blank=True, null=True)
@@ -49,8 +46,7 @@ class Hotels(AbstractDateTimeFieldBaseModel):
     website = models.URLField(blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.name
@@ -81,8 +77,7 @@ class Room(AbstractDateTimeFieldBaseModel):
     image = models.ImageField(upload_to='rooms/', blank=True, null=True)
     gallery = models.ManyToManyField('RoomImage', blank=True, related_name='room_gallery')
     is_active = models.BooleanField(default=True)
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return f"{self.hotel.name} - {self.room_type}"
@@ -178,10 +173,10 @@ class VehicleImage(AbstractDateTimeFieldBaseModel):
 class CabCategory(AbstractDateTimeFieldBaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(null=False, default='Default description')
-    icon = models.CharField(max_length=50, blank=True)  # For admin/UI
+    # icon = models.CharField(max_length=50, blank=True)  # For admin/UI
     is_active = models.BooleanField(default=True)
 
-    order = models.PositiveIntegerField(default=0)
+    # order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -192,7 +187,7 @@ class CabCategory(AbstractDateTimeFieldBaseModel):
 class Cab(AbstractDateTimeFieldBaseModel):
     category = models.ForeignKey(CabCategory, on_delete=models.SET_NULL, null=True)
     vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE)
-    driver = models.ForeignKey(Driver, on_delete=models.SET_NULL, null=True)
+    driver = models.OneToOneField(Driver, on_delete=models.SET_NULL, null=True)
     is_available = models.BooleanField(default=True)
     price_per_km = models.DecimalField(max_digits=10, decimal_places=2)
     base_fare = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
