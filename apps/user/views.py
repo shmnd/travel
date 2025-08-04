@@ -38,10 +38,10 @@ class SuperAdminLoginView(generics.GenericAPIView):
                 self.response_format['errors']        = "Invalid credentials"
                 return Response(self.response_format,status=status.HTTP_401_UNAUTHORIZED)
 
-            if not user.is_superuser:
+            if not(user.is_superuser or user.is_staff):
                 self.response_format['status_code']   = status.HTTP_403_FORBIDDEN
                 self.response_format['status']        = False
-                self.response_format['errors']        = "You are not authorized as Super Admin"
+                self.response_format['errors']        = "You are not authorized as Super Admin or Staff"
                 return Response(self.response_format,status=status.HTTP_403_FORBIDDEN)
 
             refresh = RefreshToken.for_user(user)
