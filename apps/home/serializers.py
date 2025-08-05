@@ -156,23 +156,60 @@ class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
 #         model = Hotels
 #         fields = ['id']
 
-class ListHotelSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(required=False)
-    hotel_images = CreateOrUpdateHotelImageSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Hotels
-        fields = "__all__"
 
 
 
 # Room
-class RoomImageSerializer(serializers.ModelSerializer):
+class CreateOrUpdateRoomImageSerializer(serializers.ModelSerializer):
+
+    id   = serializers.IntegerField(required=False)
+
+    room = serializers.PrimaryKeyRelatedField(
+        queryset=Room.objects.all(),
+        required=True
+    )
     class Meta:
         model = RoomImage
-        fields = ["id", "image"]
+        fields = ["id","room", "image"]
 
-class RoomSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        request       = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance = RoomImage()
+        instance.room   = validated_data.get("room",None)
+        instance.image       = validated_data.get("image",None)
+
+        instance.created_by = user_instance
+        instance.save()
+        return instance
+    
+    def update(self, instance, validated_data):
+        request       = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        instance.room           = validated_data.get("room", instance.room)
+        instance.image       = validated_data.get("image", instance.image)
+        
+        instance.modified_by = user_instance
+        instance.save()
+        return instance
+    
+
+
+class DeleteRoomImagesSerializer(serializers.Serializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+    class Meta:
+        model = RoomImage
+        fields = ['id']
+
+
+class CreateOrUpdateRoomSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False,allow_null=True)
     hotel = serializers.PrimaryKeyRelatedField(queryset=Hotels.objects.all())
     hotel_name = serializers.CharField(source="hotel.name", read_only=True)
     gallery = serializers.PrimaryKeyRelatedField(
@@ -180,7 +217,7 @@ class RoomSerializer(serializers.ModelSerializer):
         queryset=RoomImage.objects.all(),
         required=False
     )
-    gallery_details = RoomImageSerializer(source="gallery", many=True, read_only=True)
+    gallery_details = CreateOrUpdateRoomImageSerializer(source="room_images", many=True, read_only=True)
 
     class Meta:
         model = Room
@@ -191,6 +228,80 @@ class RoomSerializer(serializers.ModelSerializer):
             "gallery_details",  # for output (nested details)
             "is_active",
         ]
+
+    def validate(self, attrs):
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        request = self.context.get("request", None)
+        user_instance = get_token_user_or_none(request)
+
+        gallery = validated_data.pop("gallery", [])
+
+        instance = Room()
+        instance.hotel = validated_data.get("hotel", None)
+        instance.room_type = validated_data.get("room_type", None)
+        instance.name = validated_data.get("name", None)
+        instance.description = validated_data.get("description", None)
+        instance.price = validated_data.get("price", 0.0)
+        instance.availability = validated_data.get("availability", True)
+        instance.max_occupancy = validated_data.get("max_occupancy", 1)
+        instance.facilities = validated_data.get("facilities", None)
+        instance.image = validated_data.get("image", None)
+        instance.is_active = validated_data.get("is_active", True)
+
+        instance.created_by = user_instance
+        instance.save()
+
+        if gallery:
+            instance.gallery.set(gallery)
+
+        return instance
+
+    def update(self, instance, validated_data):
+        request = self.context.get("request", None)
+        user_instance = get_token_user_or_none(request)
+
+        gallery = validated_data.pop("gallery", None)
+
+        instance.hotel = validated_data.get("hotel", instance.hotel)
+        instance.room_type = validated_data.get("room_type", instance.room_type)
+        instance.name = validated_data.get("name", instance.name)
+        instance.description = validated_data.get("description", instance.description)
+        instance.price = validated_data.get("price", instance.price)
+        instance.availability = validated_data.get("availability", instance.availability)
+        instance.max_occupancy = validated_data.get("max_occupancy", instance.max_occupancy)
+        instance.facilities = validated_data.get("facilities", instance.facilities)
+        instance.image = validated_data.get("image", instance.image)
+        instance.is_active = validated_data.get("is_active", instance.is_active)
+
+        instance.modified_by = user_instance
+        instance.save()
+
+        if gallery is not None:
+            instance.gallery.set(gallery)
+
+        return instance
+
+
+class DeleteRoomSerializer(serializers.ModelSerializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+    class Meta:
+        model = Room
+        fields = ['id']
+
+
+# List hotel with room and images
+class ListHotelSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(required=False)
+    hotel_images = CreateOrUpdateHotelImageSerializer(many=True, read_only=True)
+    rooms = CreateOrUpdateRoomSerializer(many=True, read_only=True)
+    room_images = CreateOrUpdateRoomImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Hotels
+        fields = "__all__"
 
 
 

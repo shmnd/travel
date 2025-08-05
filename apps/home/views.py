@@ -23,6 +23,10 @@ from apps.home.serializers import ( CreateOrUpdateHotelSerializer,
                                     DeleteCabSerializer,
                                     CreateOrUpdateHotelImageSerializer,
                                     DeleteHotelImagesSerializer,
+                                    CreateOrUpdateRoomSerializer,
+                                    DeleteRoomSerializer,
+                                    CreateOrUpdateRoomImageSerializer,
+                                    DeleteRoomImagesSerializer
                                 )
 
 logger = logging.getLogger(__name__)
@@ -236,6 +240,217 @@ class GetHotelImagesListApiView(generics.GenericAPIView):
             return Response(self.response_format, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
+# room image =------------------------------------------------------------------------
+
+
+class CreateOrUpdateRoomImage(generics.GenericAPIView):
+    def __init__(self, **kwargs: Any):
+        self.response_format = ResponseInfo().response
+        super(CreateOrUpdateRoomImage,self).__init__(**kwargs)
+
+    serializer_class    = CreateOrUpdateRoomImageSerializer
+    permission_classes  = (IsAdminUser,)
+
+    @swagger_auto_schema(tags=['Room-Images'])
+    def post(self,request):
+        try:
+            instance    = get_object_or_none(RoomImage,pk=request.data.get('id',None))
+            serializer  = self.serializer_class(instance,data=request.data,context={'request':request}, partial=True)
+
+            if not serializer.is_valid():
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['errors']        = serializer.errors
+                return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer.save()
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['message']       = "Sucess"
+            self.response_format['data']          = serializer.data
+            return Response(self.response_format,status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            # exec_type,exc_obj,exc_tb = sys.exc_info()
+            # fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            # self.response_format['message']       = f'exc_type : {exec_type},fname:{fname},tb_lineno:{exc_tb.tb_lineno},error:{str(e)}'
+            self.response_format['message']       = f'{str(e)}'
+
+            return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class DeleteRoomImageApiView(generics.DestroyAPIView):
+    def __init__(self, **kwargs: Any) -> None:
+        self.response_format = ResponseInfo().response
+        super(DeleteRoomImageApiView,self).__init__(**kwargs)
+
+    serializer_class = DeleteRoomImagesSerializer  
+    permission_classes = [IsAdminUser,]
+
+
+    @swagger_auto_schema (tags=["Room-Images"],request_body=serializer_class)
+    def delete(self, request, *args, **kwargs):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if not serializer.is_valid():
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['error']         = serializer.errors
+                return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
+            
+            ids = serializer.validated_data.get('id')
+            RoomImage.objects.filter(id__in = ids).delete()
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['message']       = "Deleted success"
+            return Response(self.response_format,status=status.HTTP_200_OK)
+
+        except Exception as e:
+            exc_type,exc_obj,exc_tb               = sys.exc_info()
+            fname                                 = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = f'exc_type:{exc_type},fname:{fname},tb_lineno:{exc_tb.tb_lineno},error:{str(e)}'
+            return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class GetRoomImagesListApiView(generics.GenericAPIView):
+    def __init__(self, **kwargs: Any) -> None:
+        self.response_format = ResponseInfo().response
+        super(GetRoomImagesListApiView,self).__init__(**kwargs)
+
+    serializer_class    = CreateOrUpdateRoomImageSerializer
+    permission_classes  = (IsAdminUser,)
+
+    @swagger_auto_schema(tags=['Room-Images'])
+    def get (self,request):
+        try:
+            queryset = RoomImage.objects.all().order_by('id')
+            serializer = self.serializer_class(queryset,many=True,context={'request':request})
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['data']          = serializer.data
+            return Response(self.response_format,status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            exc_type, exc_obj, exc_tb             = sys.exc_info()
+            fname                                 = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = f'exc_type : {exc_type},fname : {fname},tb_lineno : {exc_tb.tb_lineno},error : {str(e)}'
+            return Response(self.response_format, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Room ------------------------------------------------------------------------------------------------ 
+
+class CreateOrUpdateRoom(generics.GenericAPIView):
+    def __init__(self, **kwargs: Any):
+        self.response_format = ResponseInfo().response
+        super(CreateOrUpdateRoom,self).__init__(**kwargs)
+
+    serializer_class    = CreateOrUpdateRoomSerializer
+    permission_classes  = (IsAdminUser,)
+
+    @swagger_auto_schema(tags=['Room'])
+    def post(self,request):
+        try:
+            instance    = get_object_or_none(Room,pk=request.data.get('id',None))
+            serializer  = self.serializer_class(instance,data=request.data,context={'request':request}, partial=True)
+
+            if not serializer.is_valid():
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['errors']        = serializer.errors
+                return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer.save()
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['message']       = "Sucess"
+            self.response_format['data']          = serializer.data
+            return Response(self.response_format,status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            exec_type,exc_obj,exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = f'exc_type : {exec_type},fname:{fname},tb_lineno:{exc_tb.tb_lineno},error:{str(e)}'
+            return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+class GetRoomListApiView(generics.GenericAPIView):
+    def __init__(self, **kwargs: Any) -> None:
+        self.response_format = ResponseInfo().response
+        super(GetRoomListApiView,self).__init__(**kwargs)
+
+    serializer_class    = CreateOrUpdateRoomSerializer
+    permission_classes  = (IsAdminUser,)
+
+    @swagger_auto_schema(tags=['Room'])
+    def get (self,request):
+        try:
+            queryset = Room.objects.all().order_by('-id')
+            serializer = self.serializer_class(queryset,many=True,context={'request':request})
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['data']          = serializer.data
+            return Response(self.response_format,status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            exc_type, exc_obj, exc_tb             = sys.exc_info()
+            fname                                 = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = f'exc_type : {exc_type},fname : {fname},tb_lineno : {exc_tb.tb_lineno},error : {str(e)}'
+            return Response(self.response_format, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+
+# delete cab category
+class DeleteRoomApiView(generics.DestroyAPIView):
+    def __init__(self, **kwargs: Any) -> None:
+        self.response_format = ResponseInfo().response
+        super(DeleteRoomApiView,self).__init__(**kwargs)
+
+    serializer_class =   DeleteRoomSerializer
+    permission_classes = [IsAdminUser,]
+
+
+    @swagger_auto_schema (tags=["Room"],request_body=serializer_class)
+    def delete(self, request, *args, **kwargs):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if not serializer.is_valid():
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['error']         = serializer.errors
+                return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
+            
+            ids = serializer.validated_data.get('id',[])
+            Room.objects.filter(id__in = ids).delete()
+            
+            self.response_format['status_code']   = status.HTTP_200_OK
+            self.response_format['status']        = True
+            self.response_format['message']       = "Deleted success"
+            return Response(self.response_format,status=status.HTTP_200_OK)
+
+        except Exception as e:
+            exc_type,exc_obj,exc_tb               = sys.exc_info()
+            fname                                 = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = f'exc_type:{exc_type},fname:{fname},tb_lineno:{exc_tb.tb_lineno},error:{str(e)}'
+            return Response(self.response_format,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

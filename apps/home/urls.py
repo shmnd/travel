@@ -18,6 +18,20 @@ urlpatterns = [
 
     ])),
 
+    re_path(r'^Room/', include([
+        path('create-or-update-room', views.CreateOrUpdateRoom.as_view()),
+        path('delete-room', views.DeleteRoomApiView.as_view()),
+        path('retrieve-room', views.GetRoomListApiView.as_view()),
+
+    ])),
+
+    re_path(r'^Room-Images/', include([
+        path('create-or-update-room-image', views.CreateOrUpdateRoomImage.as_view()),
+        path('delete-room-image', views.DeleteRoomImageApiView.as_view()),
+        path('retrieve-room-image', views.GetRoomImagesListApiView.as_view()),
+
+    ])),
+
     re_path(r'^Driver/', include([
         path('create-or-update-driver', views.CreateOrUpdateDriver.as_view()),
         path('retrive-driver', views.GetDriverListApiView.as_view()),
