@@ -24,9 +24,6 @@ class AbstractDateTimeFieldBaseModel(SafeDeleteModel, AbstractDateFieldMix):
 
 
 #Hotel Model##
-
-
-
 class Hotels(AbstractDateTimeFieldBaseModel):
     # owner = models.ForeignKey(
     #     settings.AUTH_USER_MODEL,
@@ -54,7 +51,7 @@ class Hotels(AbstractDateTimeFieldBaseModel):
 
 class HotelImage(AbstractDateTimeFieldBaseModel):
     hotel = models.ForeignKey(Hotels, on_delete=models.CASCADE, related_name='hotel_images')
-    image = models.ImageField(upload_to='hotel_images/')
+    image = models.ImageField(upload_to='home/hotel_images/')
 
 
 class Room(AbstractDateTimeFieldBaseModel):

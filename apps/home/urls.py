@@ -11,6 +11,13 @@ urlpatterns = [
 
     ])),
 
+    re_path(r'^Hotel-Images/', include([
+        path('create-or-update-Hotel-images', views.CreateOrUpdateHotelmage.as_view()),
+        path('delete-Hotel-images', views.DeleteHotelImageApiView.as_view()),
+        path('retrieve-Hotel-images', views.GetHotelImagesListApiView.as_view()),
+
+    ])),
+
     re_path(r'^Driver/', include([
         path('create-or-update-driver', views.CreateOrUpdateDriver.as_view()),
         path('retrive-driver', views.GetDriverListApiView.as_view()),

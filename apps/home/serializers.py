@@ -1,34 +1,20 @@
 from rest_framework import serializers
-from apps.home.models import Hotels,Driver,Vehicle,Cab,CabCategory
+from apps.home.models import Hotels,Driver,Vehicle,Cab,CabCategory,HotelImage,Room,RoomImage
 from helpers.helper import get_token_user_or_none
 
 
+class CreateOrUpdateHotelImageSerializer(serializers.ModelSerializer):
 
-class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
-    id   = serializers.IntegerField(allow_null=True,required=False)
-    name    = serializers.CharField(allow_null=True,allow_blank=True,required=False)
-    location = serializers.URLField(required=True)
-    address   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
-    description   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
-    facilities   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
-    main_image = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    id   = serializers.IntegerField(allow_null=True, required=False)
 
-    # gallery = serializers.CharField(required=True,allow_null=True,allow_blank=True)
-    contact_email = serializers.CharField(required=True,allow_null=True,allow_blank=True)
-    contact_phone = serializers.IntegerField(required=True)
-    website = serializers.URLField(required=True,allow_null=True,allow_blank=True)
-    is_verified = serializers.BooleanField(default=True)
-    is_active = serializers.BooleanField(default=True)
-
-
+    hotel = serializers.PrimaryKeyRelatedField(
+        queryset=Hotels.objects.all(),
+        required=True
+    )
     class Meta:
-        model = Hotels
-        fields = [
-            'id', 'name', 'location', 'address', 'description',
-            'facilities', 'main_image',
-            'contact_email', 'contact_phone', 'website',
-            'is_verified', 'is_active'#,'gallery'
-        ]
+        model = HotelImage
+        fields = ["id", "hotel", "image"]
+
 
     def validate(self, attrs):
         return super().validate(attrs)
@@ -37,19 +23,9 @@ class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
         request       = self.context.get('request', None)
         user_instance = get_token_user_or_none(request)
 
-        instance = Hotels()
-        instance.name           = validated_data.get("name",None)
-        instance.location       = validated_data.get("location",None)
-        instance.address        = validated_data.get("address",None)
-        instance.description    = validated_data.get("description",None)
-        instance.facilities     = validated_data.get("facilities",None)
-        # instance.gallery    = validated_data.get("gallery",None)
-        instance.main_image     = validated_data.get("main_image",None)
-        instance.contact_email  = validated_data.get("contact_email",None)
-        instance.contact_phone  = validated_data.get("contact_phone",None)
-        instance.website        = validated_data.get("website",None)
-        instance.is_verified    = validated_data.get("is_verified", True)
-        instance.is_active      = validated_data.get("is_active", True)
+        instance = HotelImage()
+        instance.hotel   = validated_data.get("hotel",None)
+        instance.image       = validated_data.get("image",None)
 
         instance.created_by = user_instance
         instance.save()
@@ -60,12 +36,100 @@ class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
         request       = self.context.get('request', None)
         user_instance = get_token_user_or_none(request)
 
+        instance.hotel           = validated_data.get("hotel", instance.hotel)
+        instance.image       = validated_data.get("image", instance.image)
+        
+        instance.modified_by = user_instance
+        instance.save()
+        return instance
+
+# Delete hotel image
+
+class DeleteHotelImagesSerializer(serializers.Serializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+    class Meta:
+        model = HotelImage
+        fields = ['id']
+
+
+
+# hotel
+class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
+    id   = serializers.IntegerField(allow_null=True,required=False)
+    name    = serializers.CharField(allow_null=True,allow_blank=True,required=False)
+    location = serializers.URLField(required=True)
+    address   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    description   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    facilities   = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    main_image = serializers.CharField(required=False,allow_null=True,allow_blank=True)
+    contact_email = serializers.CharField(required=True,allow_null=True,allow_blank=True)
+    contact_phone = serializers.IntegerField(required=True)
+    website = serializers.URLField(required=True,allow_null=True,allow_blank=True)
+    is_verified = serializers.BooleanField(default=True)
+    is_active = serializers.BooleanField(default=True)
+
+    gallery = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=HotelImage.objects.all(),
+        required=False
+    )
+
+    gallery_details = CreateOrUpdateHotelImageSerializer(source="hotel_images", many=True, read_only=True)
+
+
+    class Meta:
+        model = Hotels
+        fields = [
+            'id', 'name', 'location', 'address', 'description',
+            'facilities', 'main_image',
+            'contact_email', 'contact_phone', 'website',
+            'is_verified', 'is_active','gallery','gallery_details'
+        ]
+
+    def validate(self, attrs):
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        request       = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        gallery = validated_data.pop("gallery", [])
+
+        instance = Hotels()
+        instance.name           = validated_data.get("name",None)
+        instance.location       = validated_data.get("location",None)
+        instance.address        = validated_data.get("address",None)
+        instance.description    = validated_data.get("description",None)
+        instance.facilities     = validated_data.get("facilities",None)
+        instance.main_image     = validated_data.get("main_image",None)
+        instance.contact_email  = validated_data.get("contact_email",None)
+        instance.contact_phone  = validated_data.get("contact_phone",None)
+        instance.website        = validated_data.get("website",None)
+        instance.is_verified    = validated_data.get("is_verified", True)
+        instance.is_active      = validated_data.get("is_active", True)
+
+        instance.created_by = user_instance
+        instance.save()
+
+        for image in gallery:
+            image.hotel = instance
+            image.save()
+
+        return instance
+    
+
+    def update(self, instance, validated_data):
+        request       = self.context.get('request', None)
+        user_instance = get_token_user_or_none(request)
+
+        gallery = validated_data.pop("gallery", None)
+
         instance.name           = validated_data.get("name", instance.name)
         instance.location       = validated_data.get("location", instance.location)
         instance.address        = validated_data.get("address", instance.address)
         instance.description    = validated_data.get("description", instance.description)
         instance.facilities     = validated_data.get("facilities", instance.facilities)
-        # instance.gallery    = validated_data.get("hotel_price", instance.gallery)
         instance.main_image     = validated_data.get("main_image", instance.main_image)
         instance.contact_email  = validated_data.get("contact_email", instance.contact_email)
         instance.contact_phone  = validated_data.get("contact_phone", instance.contact_phone)
@@ -75,6 +139,14 @@ class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
 
         instance.modified_by = user_instance
         instance.save()
+
+        if gallery is not None:
+            # detach old images not in the new list
+            HotelImage.objects.filter(hotel=instance).exclude(id__in=[img.id for img in gallery]).update(hotel=None)
+            for image in gallery:
+                image.hotel = instance
+                image.save()
+
         return instance
     
 # class DeleteHotelSerializer(serializers.ModelSerializer):
@@ -86,10 +158,40 @@ class CreateOrUpdateHotelSerializer(serializers.ModelSerializer):
 
 class ListHotelSerializer(serializers.ModelSerializer):
     id = serializers.CharField(required=False)
+    hotel_images = CreateOrUpdateHotelImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Hotels
         fields = "__all__"
+
+
+
+# Room
+class RoomImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoomImage
+        fields = ["id", "image"]
+
+class RoomSerializer(serializers.ModelSerializer):
+    hotel = serializers.PrimaryKeyRelatedField(queryset=Hotels.objects.all())
+    hotel_name = serializers.CharField(source="hotel.name", read_only=True)
+    gallery = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=RoomImage.objects.all(),
+        required=False
+    )
+    gallery_details = RoomImageSerializer(source="gallery", many=True, read_only=True)
+
+    class Meta:
+        model = Room
+        fields = [
+            "id","hotel", "hotel_name","room_type", "name","description",
+            "price", "availability", "max_occupancy","facilities","image",
+            "gallery",          # for input (IDs of RoomImage)
+            "gallery_details",  # for output (nested details)
+            "is_active",
+        ]
+
 
 
 # vehicle
@@ -315,7 +417,6 @@ class CreateOrUpdateCabCategorySerializer(serializers.ModelSerializer):
         instance.description       = validated_data.get("description", None)
         instance.is_active              = validated_data.get("is_active", None)
 
-
         instance.created_by = user_instance
         instance.save()
         return instance
@@ -327,7 +428,6 @@ class CreateOrUpdateCabCategorySerializer(serializers.ModelSerializer):
         instance.name               = validated_data.get("name", instance.name)
         instance.description       = validated_data.get("description", instance.description)
         instance.is_active              = validated_data.get("is_active", instance.is_active)
-
 
         instance.modified_by = user_instance
         instance.save()
