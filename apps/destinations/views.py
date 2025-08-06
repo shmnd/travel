@@ -13,7 +13,7 @@ from apps.destinations.serializers import(CreateOrUpdateDestinationSerializer,
                                           CreateOrUpdateActivityImageSerializer,
                                           DeleteActivityImageSerializer,
                                           CreateOrUpdateActivitySerializer,
-                                          ListAndDeleteActivitySerializer,
+                                          DeleteActivitySerializer,
                                           )
 
 # Create your views here.
@@ -204,7 +204,7 @@ class GetActivityImageList(generics.GenericAPIView):
     @swagger_auto_schema(tags=['Activity-Image'])
     def get(self,request):
         try:
-            queryset = ActivityImage.objects.all().order_by('id')
+            queryset = ActivityImage.objects.all().order_by('-id')
             serializer = self.serializer_class(queryset,many=True,context={'request':request})
 
             self.response_format['status_code']   = status.HTTP_200_OK
@@ -265,7 +265,7 @@ class DeleteActivity(generics.DestroyAPIView):
         self.response_format = ResponseInfo().response
         super(DeleteActivity,self).__init__(**kwargs)
 
-    serializer_class = ListAndDeleteActivitySerializer
+    serializer_class = DeleteActivitySerializer
     permission_classes = [IsAdminUser,]
 
     @swagger_auto_schema(tags=['Activity'],request_body=serializer_class)
@@ -279,7 +279,7 @@ class DeleteActivity(generics.DestroyAPIView):
                 self.response_format['error']         = serializer.errors
                 return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
             
-            ids = serializer.validated_data.get('id')
+            ids = serializer.validated_data.get('id',[])
             Activity.objects.filter(id__in=ids).delete()
 
             self.response_format['status_code']   = status.HTTP_200_OK
@@ -301,13 +301,13 @@ class GetActivityList(generics.GenericAPIView):
         self.response_format = ResponseInfo().response
         super(GetActivityList,self).__init__(**kwargs)
 
-    serializer_class = ListAndDeleteActivitySerializer
+    serializer_class = CreateOrUpdateActivitySerializer
     permission_classes = (IsAdminUser,)
 
     @swagger_auto_schema(tags=['Activity'])
     def get(self,request):
         try:
-            queryset = Activity.objects.all().order_by('id')
+            queryset = Activity.objects.all().order_by('-id')
             serializer = self.serializer_class(queryset,many=True,context={'request':request})
 
             self.response_format['status_code']   = status.HTTP_200_OK

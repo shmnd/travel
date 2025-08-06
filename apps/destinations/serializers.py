@@ -238,10 +238,10 @@ class CreateOrUpdateActivitySerializer(serializers.ModelSerializer):
         return instance
 
 
+class DeleteActivitySerializer(serializers.ModelSerializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
 
-class ListAndDeleteActivitySerializer(serializers.ModelSerializer):
-    id = serializers.CharField(required=False)
-    activity_gallery = CreateOrUpdateActivityImageSerializer(source="activity_images", many=True, read_only=True)
     class Meta:
         model = Activity
-        fields = "__all__"
+        fields = ['id']
+
