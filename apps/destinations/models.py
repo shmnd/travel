@@ -92,6 +92,7 @@ class Destination(AbstractDateFieldMix):
     travel_type = models.CharField(_('Travel type'),choices=TravelType.choices,blank=True, null=True)
 
 
+
     class Meta:
         verbose_name          = "Destination"
         verbose_name_plural   = "Destinations"

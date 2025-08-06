@@ -101,15 +101,15 @@ class CreateOrUpdateDestinationSerializer(serializers.ModelSerializer):
         return instance
         
 
-class ListAndDeleteDestinationsSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(required=False)
+class DeleteDestiantionSerializer(serializers.ModelSerializer):
+    id = serializers.ListField(child=serializers.IntegerField(), required=True)
 
     class Meta:
         model = Destination
-        fields = "__all__"
+        fields = ['id']
 
 
-
+# Activiy Image
 
 class CreateOrUpdateActivityImageSerializer(serializers.ModelSerializer):
     id   = serializers.IntegerField(allow_null=True, required=False)

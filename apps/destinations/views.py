@@ -9,7 +9,7 @@ from helpers.response import ResponseInfo
 from helpers.helper import get_object_or_none
 from apps.destinations.models import Destination,ActivityImage,Activity
 from apps.destinations.serializers import(CreateOrUpdateDestinationSerializer,
-                                          ListAndDeleteDestinationsSerializer,
+                                          DeleteDestiantionSerializer,
                                           CreateOrUpdateActivityImageSerializer,
                                           DeleteActivityImageSerializer,
                                           CreateOrUpdateActivitySerializer,
@@ -60,7 +60,7 @@ class DeletDestination(generics.DestroyAPIView):
         self.response_format = ResponseInfo().response
         super(DeletDestination,self).__init__(**kwargs)
 
-    serializer_class = ListAndDeleteDestinationsSerializer
+    serializer_class = DeleteDestiantionSerializer
     permission_classes = [IsAdminUser,]
 
     @swagger_auto_schema(tags=['Destination'],request_body=serializer_class)
@@ -74,7 +74,7 @@ class DeletDestination(generics.DestroyAPIView):
                 self.response_format['error']         = serializer.errors
                 return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
             
-            ids = serializer.validated_data.get('id')
+            ids = serializer.validated_data.get('id',[])
             Destination.objects.filter(id__in=ids).delete()
 
             self.response_format['status_code']   = status.HTTP_200_OK
@@ -96,7 +96,7 @@ class GetDestinationList(generics.GenericAPIView):
         self.response_format = ResponseInfo().response
         super(GetDestinationList,self).__init__(**kwargs)
 
-    serializer_class = ListAndDeleteDestinationsSerializer
+    serializer_class = CreateOrUpdateDestinationSerializer
     permission_classes = (IsAdminUser,)
 
     @swagger_auto_schema(tags=['Destination'])
