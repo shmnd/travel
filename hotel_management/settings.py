@@ -70,7 +70,8 @@ LOCAL_APPS = [
     'apps.home',
     'apps.destinations',
     'apps.cabs',
-    'apps.user'
+    'apps.user',
+    'apps.webinar',
 ]
 
 THIRD_PARTY_APPS = [
@@ -234,3 +235,7 @@ REST_PAGINATED_PAGE_SIZE        = os.environ.get('REST_PAGINATED_PAGE_SIZE','')
 #uploding image size to slove in issue in server
 DATA_UPLOAD_MAX_MEMORY_SIZE     = 524288000000
 DATA_UPLOAD_MAX_NUMBER_FIELDS   = 10000
+
+
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')

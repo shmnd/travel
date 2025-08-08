@@ -50,7 +50,9 @@ urlpatterns = [
         path('user/',include('apps.user.urls')),
         path('home/', include('apps.home.urls')),
         path('destination/',include('apps.destinations.urls')),
-        path('cabs/',include('apps.cabs.urls'))
+        path('cabs/',include('apps.cabs.urls')),
+        path('webinar/',include('apps.webinar.urls')),
+
 
 
     ])),

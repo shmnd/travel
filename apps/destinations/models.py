@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from apps.home.models import AbstractDateFieldMix
+from apps.home.models import AbstractDateTimeFieldBaseModel
 # Create your models here.
 
 
@@ -29,7 +29,7 @@ from apps.home.models import AbstractDateFieldMix
         # return self.name
 
 
-class Activity(models.Model):
+class Activity(AbstractDateTimeFieldBaseModel):
     name = models.CharField(max_length=255,blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     # category = models.ForeignKey(ActivityCategory, on_delete=models.SET_NULL, null=True, blank=True)
@@ -51,7 +51,7 @@ class Activity(models.Model):
         return self.name
 
 
-class ActivityImage(models.Model):
+class ActivityImage(AbstractDateTimeFieldBaseModel):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='activity_images')
     image = models.ImageField(upload_to='destinations/activity_images/')
 
@@ -60,7 +60,7 @@ class ActivityImage(models.Model):
 
 
 
-class Destination(AbstractDateFieldMix):
+class Destination(AbstractDateTimeFieldBaseModel):
     class TravelType(models.TextChoices):
         honeymoon = "Honey Moon"
         adventure = "Adventure"
